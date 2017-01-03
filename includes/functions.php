@@ -881,15 +881,25 @@ function tracpress_orderby_tax_clauses( $clauses, $wp_query ) {
 							 'tag' );
 		foreach ($taxonomies as $taxonomy) {
 			if ( $taxonomy == $wp_query->query['orderby'] || isset( $wp_query->query_vars['orderby'][$taxonomy] )  ) {
-				$clauses['join'] .=<<<SQL
- LEFT OUTER JOIN {$wpdb->term_relationships} ON {$wpdb->posts}.ID={$wpdb->term_relationships}.object_id
-LEFT OUTER JOIN {$wpdb->term_taxonomy} USING (term_taxonomy_id)
-LEFT OUTER JOIN {$wpdb->terms} USING (term_id)
-SQL;
-				$clauses['where'] .= " AND (taxonomy = 'tracpress_ticket_{$taxonomy}' OR taxonomy IS NULL)";
-				$clauses['groupby'] = "object_id";
+				//$clauses['join'] .=<<<SQL
+ //LEFT OUTER JOIN {$wpdb->term_relationships} AS term_relationships_orderby ON {$wpdb->posts}.ID=term_relationships_orderby.object_id
+//LEFT OUTER JOIN {$wpdb->term_taxonomy} AS term_taxonomy_orderby ON (term_relationships_orderby.term_taxonomy_id=term_taxonomy_orderby.term_taxonomy_id)
+//LEFT OUTER JOIN {$wpdb->terms} AS terms_orderby ON (term_taxonomy_orderby.term_id=terms_orderby.term_id)
+//SQL;
+				//$clauses['where'] .= " AND (term_taxonomy_orderby.taxonomy = 'tracpress_ticket_{$taxonomy}' OR term_taxonomy_orderby.taxonomy IS NULL)";
+				//$clauses['groupby'] = "term_relationships_orderby.object_id";
 				$orderby = $clauses['orderby'];
-				$clauses['orderby'] = "GROUP_CONCAT({$wpdb->terms}.name ORDER BY name ASC) ";
+				//$clauses['orderby'] = "GROUP_CONCAT(terms_orderby.name ORDER BY name ASC) ";
+				// http://scribu.net/wordpress/sortable-taxonomy-columns.html
+				$clauses['orderby'] = "(
+			SELECT GROUP_CONCAT(name ORDER BY name ASC)
+			FROM $wpdb->term_relationships
+			INNER JOIN $wpdb->term_taxonomy USING (term_taxonomy_id)
+			INNER JOIN $wpdb->terms USING (term_id)
+			WHERE $wpdb->posts.ID = object_id
+			AND taxonomy = 'tracpress_ticket_{$taxonomy}'
+			GROUP BY object_id
+		) ";
 				$clauses['orderby'] .= 'ASC' == strtoupper( $wp_query->get('order') ) ? 'ASC' : ( isset( $wp_query->query_vars['orderby'][$taxonomy] ) ? $wp_query->query_vars['orderby'][$taxonomy] : 'DESC' );
 				$clauses['orderby'] .= ", " . $orderby;
 			}
