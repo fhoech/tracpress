@@ -60,7 +60,7 @@ get_header(); ?>
 					function tracpress_th( $field, $html, $title=false, $default_order='DESC' ) {
 						global $wp, $query_orderby, $query_order;
 						$order = ( $field == $query_orderby ? ( $query_order == 'ASC' ? 'DESC' : 'ASC' ) : $default_order );
-						return '<th class="orderby-' . strtolower( sanitize_html_class( $field ) ) . ' order-' . strtolower( sanitize_html_class( $order ) ) . '"' . ( !empty($title) ? ' title="' . esc_html( $title ) . '"' : '' ) . '><a href="' . esc_url( site_url( strtok( $_SERVER['REQUEST_URI'], '?' ) . '?orderby=' . $field . '&order=' . $order ) ) . '" style="display: inline-block; width: 100%">' . $html . ( $field == $query_orderby ? ( $query_order == 'ASC' ? '&#9650; ' : '&#9660; ' ) : '' ) . '</a></th>';
+						return '<th class="orderby-' . strtolower( sanitize_html_class( $field ) ) . ' order-' . strtolower( sanitize_html_class( $order ) ) . '"' . ( !empty($title) ? ' title="' . esc_html( $title ) . '"' : '' ) . '><a href="' . esc_url( add_query_arg( array( 'orderby' => $field, 'order' => $order ) ) ) . '" rel="nofollow" style="display: inline-block; width: 100%">' . $html . ( $field == $query_orderby ? ( $query_order == 'ASC' ? '&#9650; ' : '&#9660; ' ) : '' ) . '</a></th>';
 					}
 
 					$out = '<table id="sortme" class="tracpress-' . $u . ' orderby-' . strtolower( sanitize_html_class( $query_orderby, get_option('tp_orderby') ) ) . ' order-' . strtolower( sanitize_html_class( $query_order, 'DESC' ) ) . '"><thead><tr>';

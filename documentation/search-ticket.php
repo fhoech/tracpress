@@ -24,32 +24,38 @@ get_header(); ?>
 				<?php
 					$u = uniqid();
 
-					$out = '<table id="sortme" class="tracpress-' . $u . '"><thead><tr>';
+					function tracpress_th( $field, $html, $title=false, $default_order='DESC' ) {
+						global $wp, $query_orderby, $query_order;
+						$order = ( $field == $query_orderby ? ( $query_order == 'ASC' ? 'DESC' : 'ASC' ) : $default_order );
+						return '<th class="orderby-' . strtolower( sanitize_html_class( $field ) ) . ' order-' . strtolower( sanitize_html_class( $order ) ) . '"' . ( !empty($title) ? ' title="' . esc_html( $title ) . '"' : '' ) . '><a href="' . esc_url( add_query_arg( array( 'orderby' => $field, 'order' => $order ) ) ) . '" rel="nofollow" style="display: inline-block; width: 100%">' . $html . ( $field == $query_orderby ? ( $query_order == 'ASC' ? '&#9650; ' : '&#9660; ' ) : '' ) . '</a></th>';
+					}
+
+					$out = '<table id="sortme" class="tracpress-' . $u . ' orderby-' . strtolower( sanitize_html_class( $query_orderby, get_option('tp_orderby') ) ) . ' order-' . strtolower( sanitize_html_class( $query_order, 'DESC' ) ) . '"><thead><tr>';
 								if(get_option('tp_id_optional') == 1)
-									$out .= '<th class="no-sort">Ticket</th>';
+									$out .= tracpress_th('ID', 'Ticket');
 								if(get_option('tp_summary_optional') == 1)
-									$out .= '<th>Summary</th>';
+									$out .= tracpress_th('title', 'Summary', false, 'ASC');
 								if(get_option('tp_author_optional') == 1)
-									$out .= '<th>Reporter</th>';
+									$out .= tracpress_th('author', 'Reporter', false, 'ASC');
 								if(get_option('tp_component_optional') == 1)
-									$out .= '<th>Component</th>';
+									$out .= tracpress_th('component,version', 'Component', false, 'ASC');
 								if(get_option('tp_priority_optional') == 1)
-									$out .= '<th title="Priority"></th>';
+									$out .= tracpress_th('priority', '', 'Priority');
 								if(get_option('tp_severity_optional') == 1)
-									$out .= '<th title="Severity"></th>';
+									$out .= tracpress_th('severity', '', 'Severity');
 								if(get_option('tp_milestone_optional') == 1)
-									$out .= '<th>Milestone</th>';
+									$out .= tracpress_th('milestone', 'Milestone', false, 'ASC');
 								if(get_option('tp_type_optional') == 1)
-									$out .= '<th>Type</th>';
+									$out .= tracpress_th('type', 'Type', false, 'ASC');
 								if(get_option('tp_workflow_optional') == 1)
-									$out .= '<th>Workflow</th>';
-								$out .= '<th>Status/Resolution</th>';
+									$out .= tracpress_th('workflow', 'Workflow', false, 'ASC');
+								$out .= tracpress_th('resolution,status', 'Status/Resolution', false, 'ASC');
 								if(get_option('tp_comments_optional') == 1)
-									$out .= '<th><i class="fa fa-comments"></i></th>';
+									$out .= tracpress_th('comment_count', '<i class="fa fa-comments"></i>', 'Comments', 'ASC');
 								if(get_option('tp_plus_optional') == 1)
-									$out .= '<th>+1s</th>';
+									$out .= tracpress_th('votes_count', '+1s');
 								if(get_option('tp_date_optional') == 1)
-									$out .= '<th class="sort-default">Date</th>';
+									$out .= tracpress_th('date', 'Date');
 							$out .= '</tr></thead>';
 					// Start the Loop.
 					while ( have_posts() ) : the_post();
