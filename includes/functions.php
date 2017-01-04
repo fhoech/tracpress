@@ -532,7 +532,7 @@ function tp_main($i) {
 	$ticket_version = get_post_meta(get_the_ID(), 'ticket_version', true);
 
 	if($ticket_status == 'new') $icon = 'file-o';
-	if($ticket_status == 'accepted') $icon = 'toggle-on';
+	if($ticket_status == 'accepted') $icon = 'file-o';
 	if($ticket_status == 'assigned') $icon = 'user';
 	if($ticket_status == 'reviewing') $icon = 'wrench';
 	if($ticket_status == 'closed') $icon = 'check';
@@ -561,7 +561,7 @@ function tp_main($i) {
 		<i class="fa fa-fw fa-user"></i> Created by <?php the_author_posts_link(); ?> <time datetime="<?php the_time('Y-m-d'); ?>T<?php the_time('H:i:s'); ?>" title="<?php the_time(get_option('date_format')); ?> <?php the_time('H:i:s'); ?>"><?php echo human_time_diff(get_the_time('U'), current_time('timestamp')) . ' ago'; ?></time><br>
 		<?php
 			if ( ! empty( $workflows ) ) {
-				echo '<i class="fa fa-fw fa-' . $icon . '"></i> ';
+				echo '<i class="fa fa-fw fa-cogs"></i> ';
 				foreach ( $workflows as $workflow ) {
 					$seq = array();
 					while ( 1 ) {
@@ -569,7 +569,7 @@ function tp_main($i) {
 						if ( ! $workflow->parent ) break;
 						$workflow = get_term( $workflow->parent );
 					}
-					echo implode( ' → ', $seq );
+					echo implode( ', ', $seq );
 				}
 			}
 			if ( $ticket_resolution ) {
