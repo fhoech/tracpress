@@ -377,9 +377,7 @@ add_filter('wp_get_object_terms', 'wp_get_object_terms_exclude_filter', 10, 4);
 
 // frontend image editor
 function tp_editor() {
-    global $post, $current_user;
-
-    get_current_user();
+    global $post;
 
     // check if user is author // show author tools
 	$action = 'edit';
@@ -398,7 +396,7 @@ function tp_editor() {
 	if ((isset($_GET['d']) || isset($_POST['post_id'])) && !$allowed) {
 		echo "<p>You are not allowed to $action this ticket.</p>";
 	}
-    if($post->post_author == $current_user->ID || $allowed) { ?>
+    if($post->post_author == get_current_user_id() || $allowed) { ?>
 		<div>
 			<p><a href="#" class="tp-editor-display" style="display: inline"><i class="fa fa-fw fa-pencil"></i> Edit ticket</a></p>
 		</div>

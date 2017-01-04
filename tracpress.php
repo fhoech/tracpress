@@ -190,8 +190,7 @@ function tracpress_process_image_secondary($file, $post_id, $summary) {
 }
 
 function tracpress_get_ticket_form($ticket_summary = '', $tracpress_ticket_type = 0, $ticket_description = '', $tracpress_hardcoded_category) {
-    global $current_user;
-    get_current_user();
+    $current_user = wp_get_current_user();
 
     // upload form
 	$out = '<div class="tp-uploader">';
