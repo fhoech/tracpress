@@ -540,6 +540,15 @@ function tp_main($i) {
 		$icon = 'question';
 		$ticket_status = 'unopened';
 	}
+
+	if($ticket_resolution == 'cantfix') $icon = 'close';
+	if($ticket_resolution == 'duplicate') $icon = 'files-o';
+	if($ticket_resolution == 'invalid') $icon = 'close';
+	if($ticket_resolution == 'postpone') $icon = 'clock-o';
+	if($ticket_resolution == 'rejected') $icon = 'close';
+	if($ticket_resolution == 'wontdo') $icon = 'close';
+	if($ticket_resolution == 'wontfix') $icon = 'close';
+	if($ticket_resolution == 'worksforme') $icon = 'times';
     ?>
 
     <h3>#<?php echo $i; echo !empty($type) && !is_wp_error($type) ? ' (' . $type[0]->name . ')' : ''; ?> <?php echo get_the_title($i); ?></h3>
@@ -551,7 +560,7 @@ function tp_main($i) {
 		<?php echo getPostLikeLink($i); ?>
 	</p>
     <p>
-		<i class="fa fa-fw fa-<?php echo $icon; ?>"></i> <?php echo '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/status/' . $ticket_status) ) . '">' . tracpress_resolution_desc($ticket_status) . '</a>'; ?><br>
+		<i class="fa fa-fw fa-<?php echo $icon; ?>"></i> <?php echo '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/status/' . $ticket_status) ) . '">' . tracpress_resolution_desc($ticket_status ? $ticket_status : 'unset') . '</a>' . (!empty($ticket_resolution) && $ticket_resolution != 'resolved' ? ' as <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/resolution/' . $ticket_resolution) ) . '">' . tracpress_resolution_desc($ticket_resolution) . '</a>' : ''); ?><br>
         <?php
         if(get_option('tracpress_allow_components') == 1 && ($component || $ticket_version))
             echo '<i class="fa fa-fw fa-info-circle"></i> Component: ' . $component . ($ticket_version ? ' <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/version/' . $ticket_version) ) . '/">' . $ticket_version . '</a>' : '') . ($milestone ? ' | Milestone: ' . $milestone : '') . '<br>';
@@ -570,11 +579,6 @@ function tp_main($i) {
 					echo implode( ', ', $seq );
 				}
 			}
-			if ( $ticket_resolution ) {
-				if ( ! empty( $workflows ) ) echo '<br>';
-				echo '<i class="fa fa-fw fa-cog"></i>  <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/resolution/' . $ticket_resolution) ) . '">' . tracpress_resolution_desc($ticket_resolution) . '</a>';
-			}
-			if ( ! empty( $tags ) ) {
 		?>
     <p>
         <small>
@@ -594,16 +598,19 @@ function tp_main($i) {
 			<i class="fa fa-fw fa-clock-o"></i> Last modified <time datetime="<?php the_modified_date('Y-m-d'); ?>T<?php the_modified_time('H:i:s'); ?>" title="<?php the_modified_date(get_option('date_format')); ?> <?php the_modified_time('H:i:s'); ?>"><?php echo human_time_diff(get_the_modified_time('U'), current_time('timestamp')) . ' ago'; ?></time>
 		</small>
     </p>
+	<?php
+		if ( ! empty( $tags ) ) {
+	?>
 	<p class="entry-meta">
 		<span class="tag-links">
 			<?php
 				echo $tags;
 			?>
 		</span>
-		<?php
-			}
-		?>
 	</p>
+	<?php
+		}
+	?>
 
     <section>
         <hr>

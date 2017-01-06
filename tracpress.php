@@ -415,34 +415,39 @@ function tracpress_timeline($atts = array(), $content = null) {
             $ticket_status = get_post_meta($ticket->ID, '_ticket_status', true);
             $ticket_resolution = get_post_meta($ticket->ID, '_ticket_resolution', true);
 
-            if($ticket_status == 'new') $icon = '<i class="fa fa-file-o"></i>';
-            if($ticket_status == 'accepted') $icon = '<i class="fa fa-file-o"></i>';
-            if($ticket_status == 'assigned') $icon = '<i class="fa fa-user"></i>';
-            if($ticket_status == 'reviewing') $icon = '<i class="fa fa-wrench"></i>';
-            if($ticket_status == 'closed') $icon = '<i class="fa fa-check"></i>';
-            if($ticket_status == 'reopened') $icon = '<i class="fa fa-file-o"></i>';
+            if($ticket_status == 'new') $icon = 'file-o';
+            if($ticket_status == 'accepted') $icon = 'file-o';
+            if($ticket_status == 'assigned') $icon = 'user';
+            if($ticket_status == 'reviewing') $icon = 'wrench';
+            if($ticket_status == 'closed') $icon = 'check';
+            if($ticket_status == 'reopened') $icon = 'file-o';
 
             if($ticket_status == '') {
-                $icon = '<i class="fa fa-question"></i>';
+                $icon = 'question';
                 $ticket_status = 'unopened';
             }
-            if($ticket_resolution == '') {
-                $ticket_resolution = 'unmarked';
-            }
+
+			if($ticket_resolution == 'cantfix') $icon = 'close';
+			if($ticket_resolution == 'duplicate') $icon = 'files-o';
+			if($ticket_resolution == 'invalid') $icon = 'close';
+			if($ticket_resolution == 'postpone') $icon = 'clock-o';
+			if($ticket_resolution == 'rejected') $icon = 'close';
+			if($ticket_resolution == 'wontdo') $icon = 'close';
+			if($ticket_resolution == 'wontfix') $icon = 'close';
+			if($ticket_resolution == 'worksforme') $icon = 'times';
 
             $out .= '<div class="tp-item">';
-                $out .= '<div><small><code>' . $icon . ' ' . $ticket_status . '</code> <i class="fa fa-fw fa-clock-o"></i> Last modified <time datetime="' . get_post_modified_time('Y-m-d', false, $ticket) . 'T' . get_post_modified_time('H:i:s', false, $ticket) . '" title="' . get_post_modified_time(get_option('date_format'), false, $ticket) . ' ' . get_post_modified_time('H:i:s', false, $ticket) . '">' . human_time_diff(get_post_modified_time('U', false, $ticket), current_time('timestamp')) . ' ago</time></small></div>';
+                $out .= '<div><i class="fa fa-' . $icon . '"></i> <small>' . tracpress_resolution_desc($ticket_status ? $ticket_status : 'unset') . (!empty($ticket_resolution) && $ticket_resolution != 'resolved' ? ' as ' . tracpress_resolution_desc($ticket_resolution) : '') . '</small> &#160; <i class="fa fa-clock-o"></i> <small>Last modified <time datetime="' . get_post_modified_time('Y-m-d', false, $ticket) . 'T' . get_post_modified_time('H:i:s', false, $ticket) . '" title="' . get_post_modified_time(get_option('date_format'), false, $ticket) . ' ' . get_post_modified_time('H:i:s', false, $ticket) . '">' . human_time_diff(get_post_modified_time('U', false, $ticket), current_time('timestamp')) . ' ago</time></small></div>';
 				$type = get_the_terms($ticket->ID, 'tracpress_ticket_type');
                 $out .= '<div>' . ($ticket_status == 'closed' ? '<del>' : '') . '#' . $ticket->ID . ($ticket_status == 'closed' ? '</del>' : '') . (!empty($type) && !is_wp_error($type) ? ' (' . $type[0]->name . ')' : '') . ' <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/' . $ticket->ID . '/') ) . '">' . get_the_title($ticket->ID) . '</a> created by ' . $user_info->display_name . ' <time datetime="' . get_the_time('Y-m-d', $ticket) . 'T' . get_the_time('H:i:s', $ticket) . '" title="' . get_the_time(get_option('date_format'), $ticket) . ' ' . get_the_time('H:i:s', $ticket) . '">' . human_time_diff(get_the_time('U', $ticket), current_time('timestamp')) . ' ago</time></div>';
-                $out .= '<small><code><i class="fa fa-cog"></i> [' . $ticket_resolution . ']</code> ';
 
                 $args = array('post_id' => $ticket->ID, 'post_type' => get_option('ticket_slug'), 'number' => '1', 'orderby' => 'date', 'order' => 'DESC');
                 $comments = get_comments($args);
                 foreach($comments as $comment) :
 					$comment_content = wp_specialchars_decode(wp_strip_all_tags($comment->comment_content));
-                    $out .= '<span class="tp-comment">' . $comment->comment_author . ' wrote <time datetime="' . get_comment_date('Y-m-d', $comment) . 'T' . get_comment_date('H:i:s', $comment) . '" title="' . get_comment_date(get_option('date_format'), $comment) . ' ' . get_comment_date('H:i:s', $comment) . '">' . human_time_diff(get_comment_date('U', $comment), current_time('timestamp')) . ' ago</time>: ' . esc_html(mb_strlen($comment_content, 'UTF-8') > 90 ? substr($comment_content, 0, 90)  . '&hellip;' : $comment_content) . '</span>';
+                    $out .= '<span class="tp-comment"><i class="fa fa-comment"></i> <small>' . $comment->comment_author . ' wrote <time datetime="' . get_comment_date('Y-m-d', $comment) . 'T' . get_comment_date('H:i:s', $comment) . '" title="' . get_comment_date(get_option('date_format'), $comment) . ' ' . get_comment_date('H:i:s', $comment) . '">' . human_time_diff(get_comment_date('U', $comment), current_time('timestamp')) . ' ago</time>: ' . esc_html(mb_strlen($comment_content, 'UTF-8') > 90 ? substr($comment_content, 0, 90)  . '&hellip;' : $comment_content) . '</small></span>';
                 endforeach;
-            $out .= '</small></div>';
+            $out .= '</div>';
 		}
 
 		return $out;
@@ -627,9 +632,28 @@ function tracpress_show($atts, $content = null) {
 			$status = get_post_meta($ticket->ID, '_ticket_status', true);
 			$resolution = get_post_meta($ticket->ID, '_ticket_resolution', true);
 			$version = get_post_meta($ticket->ID, 'ticket_version', true);
+
+			if($status == 'new') $icon = 'file-o';
+			if($status == 'accepted') $icon = 'file-o';
+			if($status == 'assigned') $icon = 'user';
+			if($status == 'reviewing') $icon = 'wrench';
+			if($status == 'closed') $icon = 'check';
+			if($status == 'reopened') $icon = 'file-o';
+
+			if($status == '') $icon = 'question';
+
+			if($resolution == 'cantfix') $icon = 'close';
+			if($resolution == 'duplicate') $icon = 'files-o';
+			if($resolution == 'invalid') $icon = 'close';
+			if($resolution == 'postpone') $icon = 'clock-o';
+			if($resolution == 'rejected') $icon = 'close';
+			if($resolution == 'wontdo') $icon = 'close';
+			if($resolution == 'wontfix') $icon = 'close';
+			if($resolution == 'worksforme') $icon = 'times';
+
             $out .= '<tr class="tracpress-status-' . ($status ? $status : 'unset') . ' tracpress-resolution-' . ($resolution ? $resolution : 'unset') . '">';
                 if(get_option('tp_id_optional') == 1) {
-						$out .= '<td><a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/' . $ticket->ID . '/') ) . '">';
+						$out .= '<td><i class="fa fa-fw fa-' . $icon . '" title="' . tracpress_resolution_desc($status ? $status : 'unset') . (!empty($resolution) && $resolution != 'resolved' ? ' as ' . tracpress_resolution_desc($resolution) : '') . '"></i><a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/' . $ticket->ID . '/') ) . '">';
 						if ($status == 'closed') $out .= '<del>';
 						$out .= '#' . $ticket->ID;
 						if ($status == 'closed') $out .= '</del>';
