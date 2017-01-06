@@ -28,8 +28,9 @@ get_header(); ?>
 				<h1 class="entry-title alignleft">
 					<?php
 						echo __( 'Tickets', 'twentyfourteen' );
+						if ( ! empty( $query_status ) ) echo '—' . esc_html( tracpress_resolution_desc( $query_status ) );
+						if ( ! empty( $query_resolution ) ) echo '—' . esc_html( tracpress_resolution_desc( $query_resolution ) ) . '';
 						if ( $term ) echo '—' . ucfirst( $taxonomy ) . ': ' . $term . '';
-						if ( ! empty( $query_resolution ) ) echo '—' . esc_html( tracpress_resolution_desc( $resolution ) ) . '';
 						if ( ! empty( $query_version ) ) echo '—Version: ' . esc_html( $query_version ) . '';
 					?></h1>
 				<div style="clear: both">
@@ -58,7 +59,7 @@ get_header(); ?>
 					$u = uniqid();
 
 					function tracpress_th( $field, $html, $title=false, $default_order='DESC' ) {
-						global $wp, $query_orderby, $query_order;
+						global $query_orderby, $query_order;
 						$order = ( $field == $query_orderby ? ( $query_order == 'ASC' ? 'DESC' : 'ASC' ) : $default_order );
 						return '<th class="orderby-' . strtolower( sanitize_html_class( $field ) ) . ' order-' . strtolower( sanitize_html_class( $order ) ) . '"' . ( !empty($title) ? ' title="' . esc_html( $title ) . '"' : '' ) . '><a href="' . esc_url( add_query_arg( array( 'orderby' => $field, 'order' => $order ) ) ) . '" rel="nofollow" style="display: inline-block; width: 100%">' . $html . ( $field == $query_orderby ? ( $query_order == 'ASC' ? '&#9650; ' : '&#9660; ' ) : '' ) . '</a></th>';
 					}
@@ -99,9 +100,28 @@ get_header(); ?>
 						$status = get_post_meta($ticket->ID, '_ticket_status', true);
 						$resolution = get_post_meta($ticket->ID, '_ticket_resolution', true);
 						$version = get_post_meta($ticket->ID, 'ticket_version', true);
+
+						if($status == 'new') $icon = 'file-o';
+						if($status == 'accepted') $icon = 'file-o';
+						if($status == 'assigned') $icon = 'user';
+						if($status == 'reviewing') $icon = 'wrench';
+						if($status == 'closed') $icon = 'check';
+						if($status == 'reopened') $icon = 'file-o';
+
+						if($status == '') $icon = 'question';
+
+						if($resolution == 'cantfix') $icon = 'close';
+						if($resolution == 'duplicate') $icon = 'files-o';
+						if($resolution == 'invalid') $icon = 'close';
+						if($resolution == 'postpone') $icon = 'clock-o';
+						if($resolution == 'rejected') $icon = 'close';
+						if($resolution == 'wontdo') $icon = 'close';
+						if($resolution == 'wontfix') $icon = 'close';
+						if($resolution == 'worksforme') $icon = 'times';
+
 						$out .= '<tr class="tracpress-status-' . ($status ? $status : 'unset') . ' tracpress-resolution-' . ($resolution ? $resolution : 'unset') . '">';
 							if(get_option('tp_id_optional') == 1) {
-								$out .= '<td>';
+								$out .= '<td style="white-space: nowrap"><i class="fa fa-fw fa-' . $icon . '" title="' . tracpress_resolution_desc($status ? $status : 'unset') . (!empty($resolution) && $resolution != 'resolved' ? ' as ' . tracpress_resolution_desc($resolution) : '') . '"></i> ';
 								if ($status == 'closed') $out .= '<del>';
 								$out .= '#' . $ticket->ID;
 								if ($status == 'closed') $out .= '</del>';
@@ -123,7 +143,7 @@ get_header(); ?>
 								$out .= '<td>' . get_the_term_list($ticket->ID, 'tracpress_ticket_type', '', ', ', '') . '</td>';
 							if(get_option('tp_workflow_optional') == 1)
 								$out .= '<td style="white-space: nowrap">' . get_the_term_list($ticket->ID, 'tracpress_ticket_workflow', '', ', ', '') . '</td>';
-							$out .= '<td style="white-space: nowrap">' . (!empty($resolution) ? '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/resolution/' . $resolution) ) . '">' . tracpress_resolution_desc($resolution) . '</a>' : '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/status/' . $status) ) . '/">' . ucfirst($status) . '</a>') . '</td>';
+							$out .= '<td style="white-space: nowrap">' . (!empty($resolution) ? '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/resolution/' . $resolution) ) . '" title="' . tracpress_resolution_desc($status ? $status : 'unset') . ($resolution != 'resolved' ? ' as ' . tracpress_resolution_desc($resolution) : '') . '">' . tracpress_resolution_desc($resolution) . '</a>' : '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/status/' . $status) ) . '/">' . ucfirst($status) . '</a>') . '</td>';
 							if(get_option('tp_comments_optional') == 1)
 								$out .= '<td>' . get_comments_number($ticket->ID) . '</td>';
 							if(get_option('tp_plus_optional') == 1)
