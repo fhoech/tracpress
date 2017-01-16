@@ -406,8 +406,28 @@ function tracpress_timeline($atts = array(), $content = null) {
     $out = '';
 
 	if($posts) {
+		$tickets = array();
         foreach($posts as $ticket) {
             setup_postdata($ticket);
+			$args = array('post_id' => $ticket->ID, 'post_type' => get_option('ticket_slug'), 'number' => '1', 'orderby' => 'date', 'order' => 'DESC');
+			$comments = get_comments($args);
+			foreach($comments as $comment) :
+				$comment_timestamp = get_comment_date(get_option('date_format'), $comment) . ' ' . get_comment_date('H:i:s', $comment);
+				if ($comment_timestamp > $ticket->post_modified) $ticket->post_modified = $comment_timestamp;
+			endforeach;
+			$tickets[$ticket->ID] = array('ticket' => $ticket,
+										  'comments' => $comments);
+		}
+
+		function sort_by_timestamp($a, $b) {
+			return $a['ticket']->post_modified > $b['ticket']->post_modified ? -1 : ($a['ticket']->post_modified < $b['ticket']->post_modified ? 1 : 0);
+		}
+
+		usort($tickets, 'sort_by_timestamp');
+
+        foreach($tickets as $ticket) {
+			$comments = $ticket['comments'];
+			$ticket = $ticket['ticket'];
 
 			$user_info = get_userdata($ticket->post_author);
 
@@ -437,14 +457,12 @@ function tracpress_timeline($atts = array(), $content = null) {
 			if($ticket_resolution == 'worksforme') $icon = 'times';
 
             $out .= '<div class="tp-item">';
-                $out .= '<div><i class="fa fa-' . $icon . '"></i> <small>' . tracpress_resolution_desc($ticket_status ? $ticket_status : 'unset') . (!empty($ticket_resolution) && $ticket_resolution != 'resolved' ? ' as ' . tracpress_resolution_desc($ticket_resolution) : '') . '</small> &#160; <i class="fa fa-clock-o"></i> <small>Last modified <time datetime="' . get_post_modified_time('Y-m-d', false, $ticket) . 'T' . get_post_modified_time('H:i:s', false, $ticket) . '" title="' . get_post_modified_time(get_option('date_format'), false, $ticket) . ' ' . get_post_modified_time('H:i:s', false, $ticket) . '">' . human_time_diff(get_post_modified_time('U', false, $ticket), current_time('timestamp')) . ' ago</time></small></div>';
+                $out .= '<div><i class="fa fa-' . $icon . '"></i> <small>' . tracpress_resolution_desc($ticket_status ? $ticket_status : 'unset') . (!empty($ticket_resolution) && $ticket_resolution != 'resolved' ? ' as ' . tracpress_resolution_desc($ticket_resolution) : '') . '</small> &#160; <i class="fa fa-clock-o"></i> <small>Last updated <time datetime="' . get_post_modified_time('Y-m-d', false, $ticket) . 'T' . get_post_modified_time('H:i:s', false, $ticket) . '" title="' . get_post_modified_time(get_option('date_format'), false, $ticket) . ' ' . get_post_modified_time('H:i:s', false, $ticket) . '">' . human_time_diff(get_post_modified_time('U', false, $ticket), current_time('timestamp')) . ' ago</time></small></div>';
 				$type = get_the_terms($ticket->ID, 'tracpress_ticket_type');
                 $out .= '<div>' . ($ticket_status == 'closed' ? '<del>' : '') . '#' . $ticket->ID . ($ticket_status == 'closed' ? '</del>' : '') . (!empty($type) && !is_wp_error($type) ? ' (' . $type[0]->name . ')' : '') . ' <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/' . $ticket->ID . '/') ) . '">' . get_the_title($ticket->ID) . '</a> created by ' . $user_info->display_name . ' <time datetime="' . get_the_time('Y-m-d', $ticket) . 'T' . get_the_time('H:i:s', $ticket) . '" title="' . get_the_time(get_option('date_format'), $ticket) . ' ' . get_the_time('H:i:s', $ticket) . '">' . human_time_diff(get_the_time('U', $ticket), current_time('timestamp')) . ' ago</time></div>';
 
-                $args = array('post_id' => $ticket->ID, 'post_type' => get_option('ticket_slug'), 'number' => '1', 'orderby' => 'date', 'order' => 'DESC');
-                $comments = get_comments($args);
                 foreach($comments as $comment) :
-					$comment_content = wp_specialchars_decode(wp_strip_all_tags($comment->comment_content));
+					$comment_content = wp_specialchars_decode(wp_strip_all_tags(preg_replace('~<blockquote.+?</blockquote>~s', '', $comment->comment_content)));
                     $out .= '<span class="tp-comment"><i class="fa fa-comment"></i> <small>' . $comment->comment_author . ' wrote <time datetime="' . get_comment_date('Y-m-d', $comment) . 'T' . get_comment_date('H:i:s', $comment) . '" title="' . get_comment_date(get_option('date_format'), $comment) . ' ' . get_comment_date('H:i:s', $comment) . '">' . human_time_diff(get_comment_date('U', $comment), current_time('timestamp')) . ' ago</time>: ' . esc_html(mb_strlen($comment_content, 'UTF-8') > 90 ? substr($comment_content, 0, 90)  . '&hellip;' : $comment_content) . '</small></span>';
                 endforeach;
             $out .= '</div>';
