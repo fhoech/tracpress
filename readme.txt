@@ -18,6 +18,9 @@ TracPress is an enhanced issue tracking system for software development projects
 
 == Changelog ==
 
+= 2.1 =
+* Added 'notabug' resolution
+
 = 2.0 =
 * Support ticket revisions
 * Changed permalink structure to prepend ticket slug

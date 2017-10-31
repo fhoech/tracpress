@@ -3,7 +3,7 @@
 Plugin Name: TracPress
 Plugin URI: http://getbutterfly.com/wordpress-plugins-free/
 Description: TracPress is an enhanced issue tracking system for software development projects. TracPress uses a minimalistic approach to web-based software project management. TracPress is a WordPress-powered ticket manager and issue tracker featuring multiple projects, multiple users, milestones, attachments and much more.
-Version: 2.0-git$Id$
+Version: 2.1-git$Id$
 License: GPLv3
 Author: Ciprian Popescu
 Author URI: http://getbutterfly.com/
@@ -450,6 +450,7 @@ function tracpress_timeline($atts = array(), $content = null) {
 			if($ticket_resolution == 'cantfix') $icon = 'close';
 			if($ticket_resolution == 'duplicate') $icon = 'files-o';
 			if($ticket_resolution == 'invalid') $icon = 'close';
+			if($ticket_resolution == 'notabug') $icon = 'close';
 			if($ticket_resolution == 'postpone') $icon = 'clock-o';
 			if($ticket_resolution == 'rejected') $icon = 'close';
 			if($ticket_resolution == 'wontdo') $icon = 'close';
@@ -663,6 +664,7 @@ function tracpress_show($atts, $content = null) {
 			if($resolution == 'cantfix') $icon = 'close';
 			if($resolution == 'duplicate') $icon = 'files-o';
 			if($resolution == 'invalid') $icon = 'close';
+			if($resolution == 'notabug') $icon = 'close';
 			if($resolution == 'postpone') $icon = 'clock-o';
 			if($resolution == 'rejected') $icon = 'close';
 			if($resolution == 'wontdo') $icon = 'close';

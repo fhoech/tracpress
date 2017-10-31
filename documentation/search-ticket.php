@@ -84,6 +84,7 @@ get_header(); ?>
 						if($resolution == 'cantfix') $icon = 'close';
 						if($resolution == 'duplicate') $icon = 'files-o';
 						if($resolution == 'invalid') $icon = 'close';
+						if($resolution == 'notabug') $icon = 'close';
 						if($resolution == 'postpone') $icon = 'clock-o';
 						if($resolution == 'rejected') $icon = 'close';
 						if($resolution == 'wontdo') $icon = 'close';

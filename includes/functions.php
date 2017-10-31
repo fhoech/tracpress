@@ -544,6 +544,7 @@ function tp_main($i) {
 	if($ticket_resolution == 'cantfix') $icon = 'close';
 	if($ticket_resolution == 'duplicate') $icon = 'files-o';
 	if($ticket_resolution == 'invalid') $icon = 'close';
+	if($ticket_resolution == 'notabug') $icon = 'close';
 	if($ticket_resolution == 'postpone') $icon = 'clock-o';
 	if($ticket_resolution == 'rejected') $icon = 'close';
 	if($ticket_resolution == 'wontdo') $icon = 'close';
@@ -677,6 +678,7 @@ function tracpress_meta_box_callback($post) {
         <option value="fixed">fixed</option>
         <option value="implemented">implemented</option>
         <option value="invalid">invalid</option>
+        <option value="notabug">notabug</option>
         <option value="cantfix">cantfix</option>
         <option value="wontfix">wontfix</option>
         <option value="worksforme">worksforme</option>
@@ -729,6 +731,7 @@ function tracpress_resolution_desc( $resolution ) {
 	else $logical = '';
 	$resolution_sanizized = ltrim( $resolution, '!' );
 	$map = array( 'cantfix' => "Can't Fix",
+				  'notabug' => "Not A Bug",
 				  'wontfix' => "Won't Fix",
 				  'worksforme' => "Works For Me" );
 	if ( isset( $map[$resolution_sanizized] ) ) return $map[ $resolution_sanizized ];
