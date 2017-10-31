@@ -561,10 +561,10 @@ function tp_main($i) {
 		<?php echo getPostLikeLink($i); ?>
 	</p>
     <p>
-		<i class="fa fa-fw fa-<?php echo $icon; ?>"></i> <?php echo '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/status/' . $ticket_status) ) . '">' . tracpress_resolution_desc($ticket_status ? $ticket_status : 'unset') . '</a>' . (!empty($ticket_resolution) && $ticket_resolution != 'resolved' ? ' as <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/resolution/' . $ticket_resolution) ) . '">' . tracpress_resolution_desc($ticket_resolution) . '</a>' : ''); ?><br>
+		<i class="fa fa-fw fa-<?php echo $icon; ?>"></i> <?php echo '<a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/status/' . $ticket_status) ) . '" rel="nofollow">' . tracpress_resolution_desc($ticket_status ? $ticket_status : 'unset') . '</a>' . (!empty($ticket_resolution) && $ticket_resolution != 'resolved' ? ' as <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/resolution/' . $ticket_resolution) ) . '" rel="nofollow">' . tracpress_resolution_desc($ticket_resolution) . '</a>' : ''); ?><br>
         <?php
         if(get_option('tracpress_allow_components') == 1 && ($component || $ticket_version))
-            echo '<i class="fa fa-fw fa-info-circle"></i> Component: ' . $component . ($ticket_version ? ' <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/version/' . $ticket_version) ) . '/">' . $ticket_version . '</a>' : '') . ($milestone ? ' | Milestone: ' . $milestone : '') . '<br>';
+            echo '<i class="fa fa-fw fa-info-circle"></i> Component: ' . $component . ($ticket_version ? ' <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/version/' . $ticket_version) ) . '/" rel="nofollow">' . $ticket_version . '</a>' : '') . ($milestone ? ' | Milestone: ' . $milestone : '') . '<br>';
         ?>
 		<i class="fa fa-fw fa-user"></i> Created by <?php the_author_posts_link(); ?> <time datetime="<?php the_time('Y-m-d'); ?>T<?php the_time('H:i:s'); ?>" title="<?php the_time(get_option('date_format')); ?> <?php the_time('H:i:s'); ?>"><?php echo human_time_diff(get_the_time('U'), current_time('timestamp')) . ' ago'; ?></time><br>
 		<?php
@@ -573,7 +573,7 @@ function tp_main($i) {
 				foreach ( $workflows as $workflow ) {
 					$seq = array();
 					while ( 1 ) {
-						array_unshift( $seq, '<a href="' . get_term_link( $workflow ) . '">' . $workflow->name . '</a>' );
+						array_unshift( $seq, '<a href="' . get_term_link( $workflow ) . '" rel="nofollow">' . $workflow->name . '</a>' );
 						if ( ! $workflow->parent ) break;
 						$workflow = get_term( $workflow->parent );
 					}
@@ -917,4 +917,17 @@ function tracpress_orderby_tax_clauses( $clauses, $wp_query ) {
 	return $clauses;
 }
 add_filter('posts_clauses', 'tracpress_orderby_tax_clauses', 10, 2 );
+
+
+/* Add nofollow to taxonomy links */ 
+function tracpress_rel_nofollow_tax_links( $links ) {
+    return str_replace( '" rel="tag">', '" rel="tag nofollow">', $links );
+}
+add_filter( 'term_links-tracpress_ticket_component', 'tracpress_rel_nofollow_tax_links', 99, 1 );
+add_filter( 'term_links-tracpress_ticket_milestone', 'tracpress_rel_nofollow_tax_links', 99, 1 );
+add_filter( 'term_links-tracpress_ticket_severity', 'tracpress_rel_nofollow_tax_links', 99, 1 );
+add_filter( 'term_links-tracpress_ticket_tag', 'tracpress_rel_nofollow_tax_links', 99, 1 );
+add_filter( 'term_links-tracpress_ticket_type', 'tracpress_rel_nofollow_tax_links', 99, 1 );
+add_filter( 'term_links-tracpress_ticket_workflow', 'tracpress_rel_nofollow_tax_links', 99, 1 );
+
 ?>
