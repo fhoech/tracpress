@@ -164,7 +164,7 @@ function tracpress_add($atts, $content = null) {
 	}
 
 	if(get_option('tp_registration') == 0 && !is_user_logged_in()) {
-		$out .= '<p>' . __('You need to be logged in to create a ticket.', 'tracpress') . '</p>';
+		$out .= '<p>' . __('You need to be logged in to create a ticket.', 'tracpress') . '</p><p><a href="' . wp_login_url( get_permalink() ) . '" class="button">' . __( 'Log in' ) . '</a> or <a href="' . wp_registration_url() . '" class="button">' . __( 'Register' ) . '</a></p>';
 	}
 	if((get_option('tp_registration') == 0 && is_user_logged_in()) || get_option('tp_registration') == 1) {
 		$out .= tracpress_get_ticket_form($ticket_summary = $_POST['ticket_summary'], $tracpress_ticket_type = $_POST['tracpress_ticket_type'], $ticket_description = $_POST['ticket_description'], $category);
