@@ -361,7 +361,7 @@ if(!function_exists('getPostLikeLink')) {
 
 // front-end image editor
 function wp_get_object_terms_exclude_filter($terms, $object_ids, $taxonomies, $args) {
-    if(isset($args['exclude']) && $args['fields'] == 'all') {
+    if(isset($args['exclude']) && isset($args['fields']) && $args['fields'] == 'all') {
         foreach($terms as $key => $term) {
             foreach($args['exclude'] as $exclude_term) {
                 if($term->term_id == $exclude_term) {
@@ -473,7 +473,7 @@ function tp_editor() {
 
                 <p>
                     <?php echo tracpress_get_categories_dropdown('tracpress_ticket_type', $tp_category[0]->term_id); ?> 
-                    <?php if(get_option('tracpress_allow_components') == 1) echo tracpress_get_tags_dropdown('tracpress_ticket_component', $tp_tag[0]->term_id); ?> 
+                    <?php if(get_option('tracpress_allow_components') == 1) echo tracpress_get_tags_dropdown('tracpress_ticket_component', isset($tp_tag[0]) ? $tp_tag[0]->term_id : 0); ?> 
 					<?php if('' != get_option('ticket_version_label')) { ?>
 						<input type="text" name="ticket_version" value="<?php echo get_post_meta($post_id, 'ticket_version', true); ?>" placeholder="<?php echo get_option('ticket_version_label'); ?>" style="width: auto">
 					<?php } ?>
