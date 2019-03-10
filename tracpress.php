@@ -167,7 +167,7 @@ function tracpress_add($atts, $content = null) {
 		$out .= '<p>' . __('You need to be logged in to create a ticket.', 'tracpress') . '</p><p><a href="' . wp_login_url( get_permalink() ) . '" class="button">' . __( 'Log in' ) . '</a> or <a href="' . wp_registration_url() . '" class="button">' . __( 'Register' ) . '</a></p>';
 	}
 	if((get_option('tp_registration') == 0 && is_user_logged_in()) || get_option('tp_registration') == 1) {
-		$out .= tracpress_get_ticket_form($ticket_summary = $_POST['ticket_summary'], $tracpress_ticket_type = $_POST['tracpress_ticket_type'], $ticket_description = $_POST['ticket_description'], $category);
+		$out .= tracpress_get_ticket_form($ticket_summary = isset($_POST['ticket_summary']) ? $_POST['ticket_summary'] : '', $tracpress_ticket_type = isset($_POST['tracpress_ticket_type']) ? $_POST['tracpress_ticket_type'] : '', $ticket_description = isset($_POST['ticket_description']) ? $_POST['ticket_description'] : '', $category);
 	}
 
 	return $out;
@@ -324,7 +324,7 @@ register_deactivation_hook(__FILE__, 'tracpress_deactivate');
 // enqueue scripts and styles
 add_action('wp_enqueue_scripts', 'tp_enqueue_scripts');
 function tp_enqueue_scripts($hook_suffix) {
-    wp_enqueue_style('fa', '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css');
+    wp_enqueue_style('fa', '//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css');
 
     // minify with http://gpbmike.github.io/refresh-sf/
 	wp_enqueue_style('tp.bootstrap', plugins_url('css/tp.bootstrap.css', __FILE__));
@@ -364,6 +364,7 @@ function tracpress_timeline($atts = array(), $content = null) {
 		'taxonomy' => 'milestone',
 		'field' => 'id',
 		'offset' => 0,
+		'author' => '',
 	), $atts));
 
 	global $current_user;
@@ -536,7 +537,7 @@ function tracpress_milestone($atts = array(), $content = null) {
 	if ( is_int( $category ) ) $term = get_term( $category, 'tracpress_ticket_' . $taxonomy );
 	else $term = NULL;
 	if ( is_wp_error( $term ) ) $term = NULL;
-	else $term = $term->slug;
+	else if ( is_object( $term ) ) $term = property_exists( $term, 'slug' ) ? $term->slug : NULL;
 
     $out .= '<meter class="meter" value="' . $closedposts . '" min="0" max="' . $openposts . '" low="0" high="' . $openposts . '" optimum="0">' . $closedposts . '/' . $openposts . '</meter><div class="tp-meter-details">' . $openposts . ' tickets (' . $closedposts . ' <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . (!empty($term) ? '/' . $taxonomy . '/' . $term : '') . (!empty($version) ? '/version/' . $version : '') . '/status/closed' . (!empty($resolution) ? '/resolution/' . $resolution : '')) ) . '/" rel="nofollow">closed</a>, ' . ($openposts - $closedposts) . ' <a href="' . esc_url( site_url('/' . get_option('ticket_slug') . (!empty($term) ? '/' . $taxonomy . '/' . $term : '') . (!empty($version) ? '/version/' . $version : '') . '/status/!closed' . (!empty($resolution) ? '/resolution/' . $resolution : '')) ) . '/" rel="nofollow">open</a>)</div>';
     return $out;
@@ -553,6 +554,7 @@ function tracpress_show($atts, $content = null) {
 		'count'       => 0,
         'limit'       => 999999,
 		'user'        => 0,
+		'author' => '',
 	), $atts));
 
 	global $current_user;
