@@ -627,7 +627,7 @@ function tp_main($i) {
 
     <section>
         <hr>
-        <?php echo wpautop(make_clickable(get_the_content())); ?>
+        <?php the_content(); ?>
         <p>
             <?php
             $media = get_attached_media('', $i);
