@@ -375,14 +375,14 @@ function wp_get_object_terms_exclude_filter($terms, $object_ids, $taxonomies, $a
 }
 add_filter('wp_get_object_terms', 'wp_get_object_terms_exclude_filter', 10, 4);
 
-function tracpress_allowed_filetypes() {
+function tracpress_file_input() {
 	$mimes = get_allowed_mime_types();
 	$exts = array();
 	foreach ( $mimes as $ext => $mime ) {
-		if ( strpos( $ext, '_' ) === false ) $exts[] = str_replace( '|', ', ', $ext );
+		if ( strpos( $ext, '_' ) === false ) $exts[] = '.' . str_replace( '|', ', .', $ext );
 	}
 	sort( $exts );
-	return '<small>' . __( 'Allowed file types:' ) . ' <strong>' . implode( ', ', $exts ) . '</strong>, ' . __('maximum file size:') . ' <strong>' . sprintf('%d', wp_max_upload_size() / 1024 / 1024) . ' MB</strong></small>';
+	return '<small>' . __( 'Allowed file types:' ) . ' <strong>' . implode( ', ', $exts ) . '</strong>, ' . __('maximum file size:') . ' <strong>' . sprintf('%d', wp_max_upload_size() / 1024 / 1024) . ' MB</strong></small><br><input type="file" name="tracpress_additional[]" id="tracpress_additional" multiple accept="' . implode(', ', $exts ) . '">';
 }
 
 // frontend image editor
@@ -494,8 +494,7 @@ function tp_editor() {
                     ?>
 
                     <p><label for="tracpress_additional"><i class="fa fa-cloud-upload"></i> Add more files...</label><br>
-					<?php echo tracpress_allowed_filetypes(); ?><br>
-					<input type="file" name="tracpress_additional[]" id="tracpress_additional" multiple></p>
+					<?php echo tracpress_file_input(); ?></p>
                 <?php } ?>
 
                 <hr>

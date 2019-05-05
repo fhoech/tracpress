@@ -237,8 +237,7 @@ function tracpress_get_ticket_form($ticket_summary = '', $tracpress_ticket_type 
             if(1 == get_option('tp_upload_secondary'))
                 $out .= '<hr>';
                 $out .= '<p><label for="tracpress_additional"><i class="fa fa-cloud-upload"></i> Select file(s)...</label><br>';
-				$out .= tracpress_allowed_filetypes() . '<br>';
-				$out .= '<input type="file" name="tracpress_additional[]" id="tracpress_additional" multiple><br><small>Additional files (screenshots, patches, documents)</small></p><hr>';
+				$out .= tracpress_file_input() . '<br><small>Additional files (screenshots, patches, documents)</small></p><hr>';
 
             $out .= '<p>';
                 $out .= '<input type="submit" id="tracpress_submit" name="tracpress_submit" value="' . get_option('ticket_create_label') . '" class="button">';
