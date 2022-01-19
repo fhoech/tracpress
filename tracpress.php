@@ -119,6 +119,7 @@ function tracpress_add($atts, $content = null) {
                                 'size' => $files['size'][$key]
                                 );  
                         }
+						else continue;
                         $_FILES = array("attachment" => $file);
                         foreach($_FILES as $file => $array) {
                             $attach_id = media_handle_upload($file, $post_id, array(), array('test_form' => false));
@@ -135,7 +136,7 @@ function tracpress_add($atts, $content = null) {
 			add_post_meta($post_id, '_ticket_status', 'new', true);
             //wp_set_object_terms($post_id, 'open', 'tracpress_ticket_workflow');
 
-            $tags = explode(',', sanitize_text_field($_POST['tracpress_ticket_tags']));
+            $tags = explode(',', isset($_POST['tracpress_ticket_tags']) ? sanitize_text_field($_POST['tracpress_ticket_tags']) : '');
             wp_set_post_terms($post_id, $tags, 'tracpress_ticket_tag', false);
 
             add_post_meta($post_id, 'votes_count', 0, true);
