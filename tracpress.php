@@ -87,13 +87,13 @@ function tracpress_add($atts, $content = null) {
         if(get_option('tp_createusers') == 0) {
             $tp_image_author = $current_user->ID;
         }
-        $ticket_data = array(
+        $ticket_data = apply_filters('tracpress_new_ticket_pre_insert', array(
             'post_title' => sanitize_text_field($_POST['ticket_summary']),
             'post_content' => sanitize_post_field('content', $_POST['ticket_description'], 0, 'db'),
             'post_status' => $tp_status,
             'post_author' => $tp_image_author,
             'post_type' => get_option('ticket_slug')
-        );
+        ));
 
         if($post_id = wp_insert_post($ticket_data)) {
 			$data = array(
