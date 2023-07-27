@@ -154,7 +154,8 @@ function tracpress_add($atts, $content = null) {
 			$tp_notification_message = '<p>' . $user_info->display_name . ' wrote:' . "</p>\n\n" . apply_filters('the_content', get_post_field('post_content', $post_id)) . "\n\n" . '<p><a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/' . $post_id . '/') ) . '">Ticket Link</a></p>';
             $headers[] = "MIME-Version: 1.0\r\n";
             $headers[] = "Content-Type: text/html; charset=\"" . get_option('blog_charset') . "\"\r\n";
-            wp_mail($tp_notification_email, $tp_notification_subject, $tp_notification_message, $headers);
+			if ($tp_status != 'pending')
+				wp_mail($tp_notification_email, $tp_notification_subject, $tp_notification_message, $headers);
         }
 
         $out .= '<p class="message">' . __('Ticket created!', 'tracpress') . '</p>';
