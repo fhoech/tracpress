@@ -150,12 +150,17 @@ function tracpress_add($atts, $content = null) {
 			// send notification email to administrator
 			$tp_notification_email = get_option('tp_notification_email');
 			$tp_notification_subject = '[' . get_bloginfo('name') . '] ' . __('New ticket: ', 'tracpress') . sanitize_text_field(wp_unslash($_POST['ticket_summary']));
+			if (get_post_status($post_id) == 'pending')
+				$tp_notification_subject .= ' (pending review)';
 			$user_info = get_userdata($tp_image_author);
-			$tp_notification_message = '<p>' . $user_info->display_name . ' wrote:' . "</p>\n\n" . apply_filters('the_content', get_post_field('post_content', $post_id)) . "\n\n" . '<p><a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/' . $post_id . '/') ) . '">Ticket Link</a></p>';
             $headers[] = "MIME-Version: 1.0\r\n";
             $headers[] = "Content-Type: text/html; charset=\"" . get_option('blog_charset') . "\"\r\n";
-			if ($tp_status != 'pending')
-				wp_mail($tp_notification_email, $tp_notification_subject, $tp_notification_message, $headers);
+			$tp_notification_message = "<p>Author: {$user_info->user_login} <{$user_info->user_email}> (IP: {$_SERVER['REMOTE_ADDR']})</p>";
+			$category = get_the_category($post_id);
+			if(isset($category[0])) 
+				$tp_notification_message .= "<p>Category: {$category[0]->name}</p>";
+			$tp_notification_message .= '<p>' . $user_info->display_name . ' wrote:' . "</p>\n\n" . apply_filters('the_content', get_post_field('post_content', $post_id)) . "\n\n" . '<p><a href="' . esc_url( site_url('/' . get_option('ticket_slug') . '/' . $post_id . '/') ) . '">Ticket Link</a></p>';
+			wp_mail($tp_notification_email, $tp_notification_subject, $tp_notification_message, $headers);
         }
 
         $out .= '<p class="message">' . __('Ticket created!', 'tracpress') . '</p>';
@@ -758,7 +763,7 @@ function notify_status($new_status, $old_status, $post) {
 	$headers[] = "MIME-Version: 1.0\r\n";
 	$headers[] = "Content-Type: text/html; charset=\"" . get_option('blog_charset') . "\"\r\n";
 
-	if($old_status != 'pending' && $new_status == 'pending') {
+	/*if($old_status != 'pending' && $new_status == 'pending') {
 		$emails = get_option('tp_notification_email');
 		if(strlen($emails)) {
 			$subject = '[' . get_option('blogname') . '] "' . $post->post_title . '" pending review';
@@ -771,7 +776,7 @@ function notify_status($new_status, $old_status, $post) {
 			wp_mail($emails, $subject, $message, $headers);
 		}
 	}
-	elseif($old_status == 'pending' && $new_status == 'publish') {
+	else*/if($old_status == 'pending' && $new_status == 'publish') {
 		if(get_option('approvednotification') == 'yes') {
 			$subject = '[' . get_option('blogname') . '] "' . $post->post_title . '" approved';
 			$message = "<p>{$contributor->display_name}, your ticket has been approved and published at " . get_permalink($post->ID) . ".</p>";
